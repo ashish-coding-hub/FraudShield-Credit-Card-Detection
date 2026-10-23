@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FraudShield | Fraud Detection</title>
+
+<style>
+:root {
+    --bg: #07101e;
+    --panel: #101d30;
+    --border: #293e59;
+    --text: #edf4ff;
+    --muted: #a0b2ca;
+    --green: #58e2b5;
+    --red: #ff8194;
+    --blue: #2563eb;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: radial-gradient(ellipse at top left, #142d4d, transparent 40%), var(--bg);
+    color: var(--text);
+    font: 14px/1.5 Arial, sans-serif;
+}
+
+header {
+    background: #091525;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+}
+
+header h2 { margin: 0; }
+
+.status {
+    float: right;
+    color: var(--green);
+}
+
+.container {
+    max-width: 1450px;
+    margin: auto;
+    padding: 24px;
+}
+
+.muted { color: var(--muted); }
+
+.metrics {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    margin: 24px 0;
+}
+
+.metric, .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    min-width: 0;
+}
+
+.metric strong {
+    display: block;
+    font-size: 22px;
+    margin: 7px 0;
+    overflow-wrap: anywhere;
+}
+
+.workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(280px, .8fr);
+    gap: 18px;
+    align-items: start;
+}
+
+.column {
+    display: grid;
+    gap: 18px;
+    min-width: 0;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.features {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 9px;
+}
+
+label {
+    display: block;
+    margin: 8px 0 5px;
+    font-size: 12px;
+}
+
+input[type="number"] {
+    width: 100%;
+    min-width: 0;
+    padding: 10px;
+    border: 1px solid #2b405d;
+    border-radius: 8px;
+    background: #071321;
+    color: white;
+}
+
+input[type="file"] {
+    display: block;
+    max-width: 100%;
+    margin: 12px 0;
+    color: var(--muted);
+}
+
+button, .button {
+    display: inline-block;
+    padding: 12px 16px;
+    border: 0;
+    border-radius: 9px;
+    background: var(--blue);
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+button:hover, .button:hover { filter: brightness(1.12); }
+
+.secondary { background: #26364c; }
+
+.actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.actions button:first-child { flex: 1; }
+
+.upload-box {
+    padding: 16px;
+    border: 1px dashed #50719a;
+    border-radius: 10px;
+    background: #0a1626;
+}
+
+.upload-box button { width: 100%; }
+
+.alert {
+    padding: 12px;
+    margin: 12px 0;
+    border: 1px solid #813d4c;
+    border-radius: 8px;
+    background: #451d2a;
+    color: #ffb5c0;
+}
+
+.result {
+    border-color: #286c58;
+    background: #102d2b;
+}
+
+.result.fraud {
+    border-color: #813d4c;
+    background: #2b1926;
+}
+
+.green { color: var(--green); }
+.red { color: var(--red); }
+
+.score {
+    font-size: 36px;
+    font-weight: bold;
+}
+
+.meter {
+    height: 9px;
+    margin: 12px 0;
+    overflow: hidden;
+    border-radius: 10px;
+    background: #26384f;
+}
+
+.meter-fill {
+    width: 0;
+    height: 100%;
+    border-radius: 10px;
+    background: var(--green);
+}
+
+.result.fraud .meter-fill { background: var(--red); }
+
+.summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    margin: 18px 0;
+}
+
+.summary-card {
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #091523;
+    min-width: 0;
+}
+
+.summary-card span {
+    display: block;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.summary-card strong {
+    display: block;
+    margin-top: 5px;
+    font-size: 21px;
+    overflow-wrap: anywhere;
+}
+
+.table-wrap {
+    width: 100%;
+    max-height: 600px;
+    overflow: auto;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+}
+
+table {
+    width: 100%;
+    min-width: 1250px;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+th, td {
+    padding: 10px;
+    text-align: right;
+    white-space: nowrap;
+    border-bottom: 1px solid #26384f;
+}
+
+th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: #172941;
+}
+
+th:first-child, td:first-child { text-align: left; }
+tbody tr:hover { background: #172941; }
+
+.badge {
+    display: inline-block;
+    padding: 5px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.badge.fraud {
+    background: #451d2a;
+    color: #ffb5c0;
+}
+
+.badge.legit {
+    background: #123c31;
+    color: #8cf0ca;
+}
+
+.download-panel {
+    margin-top: 18px;
+    padding: 18px;
+    border: 1px solid #286c58;
+    border-radius: 10px;
+    background: #0a211f;
+}
+
+.download-button {
+    display: inline-block;
+    margin-top: 8px;
+    background: #14805e;
+}
+
+.download-button:hover { background: #15966e; }
+
+/* Footer */
+.footer {
+    margin-top: 28px;
+    padding: 20px 0;
+    border-top: 1px solid #293e59;
+    color: #a0b2ca;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.social-links {
+    display: flex;
+    gap: 18px;
+}
+
+.social-links a {
+    color: #60a5fa;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.social-links a:hover {
+    color: #58e2b5;
+}
+
+@media (max-width: 550px) {
+    .footer {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+</style>
+</head>
+
+<body>
+<header>
+    <span class="status">● MODEL READY</span>
+    <h2>⛨ FraudShield</h2>
+</header>
+
+<main class="container">
+
+    <section>
+        <p class="muted">CREDIT RISK · MACHINE LEARNING</p>
+        <h1>Fraud Detection Dashboard</h1>
+        <p class="muted">Analyse transactions and view predictions on this page.</p>
+    </section>
+
+    <section class="metrics">
+        <div class="metric">
+            <span class="muted">Model</span>
+            <strong>Random Forest</strong>
+            <span class="muted">Classification</span>
+        </div>
+
+        <div class="metric">
+            <span class="muted">Input Features</span>
+            <strong>30</strong>
+            <span class="muted">Time, V1–V28, Amount</span>
+        </div>
+
+        <div class="metric">
+            <span class="muted">Threshold</span>
+            <strong>{{ '%.1f'|format(threshold * 100) }}%</strong>
+            <span class="muted">Saved model setting</span>
+        </div>
+
+        <div class="metric">
+            <span class="muted">CSV Row Limit</span>
+            <strong>{{ '{:,}'.format(max_rows) }}</strong>
+            <span class="muted">5 MB maximum file size</span>
+        </div>
+    </section>
+
+    {% if error %}
+    <div class="alert" role="alert">{{ error }}</div>
+    {% endif %}
+
+    <div class="workspace">
+
+        <section class="column">
+
+            <div class="panel">
+                <h2>Single Transaction Assessment</h2>
+                <p class="muted">Enter Time, Amount and all V1–V28 features.</p>
+
+                <form method="POST" action="{{ url_for('index') }}">
+
+                    <div class="form-grid">
+                        <div>
+                            <label for="Time">Transaction Time</label>
+                            <input id="Time" name="Time" type="number"
+                                   min="0" step="any" required
+                                   value="{{ form_data.get('Time', '') }}">
+                        </div>
+
+                        <div>
+                            <label for="Amount">Transaction Amount</label>
+                            <input id="Amount" name="Amount" type="number"
+                                   min="0" step="any" required
+                                   value="{{ form_data.get('Amount', '') }}">
+                        </div>
+                    </div>
+
+                    <h3>Transaction Features: V1–V28</h3>
+
+                    <div class="features">
+                        {% for feature in features if feature not in ['Time', 'Amount'] %}
+                        <div>
+                            <label for="{{ feature }}">{{ feature }}</label>
+                            <input id="{{ feature }}" name="{{ feature }}"
+                                   type="number" step="any" required
+                                   value="{{ form_data.get(feature, '0') }}">
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="actions">
+                        <button type="submit">Analyse Transaction</button>
+                        <a class="button secondary" href="{{ url_for('index') }}">Reset</a>
+                    </div>
+                </form>
+            </div>
+
+            <div class="panel">
+                <h2>CSV Batch Analysis</h2>
+                <p class="muted">Upload your CSV once to display and download predictions.</p>
+
+                <form action="{{ url_for('upload') }}"
+                      method="POST" enctype="multipart/form-data">
+                    <div class="upload-box">
+                        <label for="upload-file">Select CSV File</label>
+                        <input id="upload-file" type="file" name="file"
+                               accept=".csv,text/csv" required>
+                        <button type="submit">Upload and Show Predictions</button>
+                    </div>
+                </form>
+
+                {% if upload_error %}
+                <div class="alert" role="alert">{{ upload_error }}</div>
+                {% endif %}
+
+                <p class="muted">
+                    Required columns: Time, V1–V28 and Amount.
+                    Extra Class column is allowed. Maximum upload: 5 MB.
+                </p>
+            </div>
+
+        </section>
+
+        <aside class="column">
+
+            <section class="panel result{% if result and result.label == 'Likely Fraud' %} fraud{% endif %}">
+                <h2>Risk Assessment</h2>
+
+                {% if result %}
+                <h3 class="{% if result.label == 'Likely Fraud' %}red{% else %}green{% endif %}">
+                    {{ result.label }}
+                </h3>
+
+                <div class="score">{{ '%.2f'|format(result.score_percent) }}%</div>
+                <p>Fraud Score</p>
+
+                <div class="meter">
+                    <div class="meter-fill" data-score="{{ result.score_percent }}"></div>
+                </div>
+
+                <p>Threshold: {{ '%.1f'|format(result.threshold_percent) }}%</p>
+
+                {% else %}
+                <h3>Ready to Analyse</h3>
+                <p class="muted">Submit the single transaction form to view its prediction.</p>
+                <p>Threshold: {{ '%.1f'|format(threshold * 100) }}%</p>
+                {% endif %}
+            </section>
+
+            <section class="panel">
+                <h2>Project Information</h2>
+                <p>Python · Flask</p>
+                <p>pandas · scikit-learn</p>
+                <p>Random Forest Classifier</p>
+                <p class="muted">Developed by Ashish Singh</p>
+            </section>
+
+        </aside>
+    </div>
+
+    {% if batch_results is not none and batch_summary %}
+    <section class="panel" id="batch-results" style="margin-top:20px">
+
+        <h2>CSV Prediction Results</h2>
+        <p class="muted">Uploaded file: {{ batch_filename }}</p>
+
+        <div class="summary">
+            <div class="summary-card">
+                <span>Total Transactions</span>
+                <strong>{{ '{:,}'.format(batch_summary.total) }}</strong>
+            </div>
+
+            <div class="summary-card">
+                <span>Likely Fraud</span>
+                <strong class="red">{{ '{:,}'.format(batch_summary.fraud) }}</strong>
+            </div>
+
+            <div class="summary-card">
+                <span>Looks Legitimate</span>
+                <strong class="green">{{ '{:,}'.format(batch_summary.legitimate) }}</strong>
+            </div>
+
+            <div class="summary-card">
+                <span>Average Fraud Score</span>
+                <strong>{{ '%.2f'|format(batch_summary.average_score) }}%</strong>
+            </div>
+        </div>
+
+        <p class="muted">
+            Showing {{ batch_summary.shown }} rows.
+            Summary counts cover all uploaded transactions.
+        </p>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Time</th>
+                        <th>Amount</th>
+                        {% for i in range(1, 29) %}
+                        <th>V{{ i }}</th>
+                        {% endfor %}
+                        <th>Fraud Score</th>
+                        <th>Prediction</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for row in batch_results %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ row['Time'] }}</td>
+                        <td>{{ '%.2f'|format(row['Amount']) }}</td>
+
+                        {% for i in range(1, 29) %}
+                        <td>{{ row['V' ~ i] }}</td>
+                        {% endfor %}
+
+                        <td>{{ '%.2f'|format(row['Fraud_Score_Percent']) }}%</td>
+
+                        <td>
+                            <span class="badge{% if row['Prediction'] == 'Likely Fraud' %} fraud{% else %} legit{% endif %}">
+                                {{ row['Prediction'] }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="download-panel">
+            <h3>Download Prediction Results</h3>
+            <p class="muted">
+                Your predictions are ready. Click below to download the results.
+            </p>
+
+            {% if download_ready %}
+            <a class="button download-button" href="{{ url_for('download') }}">
+                ⬇ Download Predictions CSV
+            </a>
+            {% endif %}
+        </div>
+
+        <p class="muted">
+            Up to 500 rows are displayed on the page.
+            The downloaded CSV includes all uploaded rows.
+        </p>
+
+    </section>
+    {% endif %}
+
+    <footer class="footer">
+        <div>FraudShield · Developed by Ashish Singh</div>
+
+        <div class="social-links">
+            <a href="https://github.com/ashish-coding-hub"
+               target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+
+            <a href="https://linkedin.com/in/ashish-singh-4012ab342"
+               target="_blank" rel="noopener noreferrer">LinkedIn ↗</a>
+        </div>
+    </footer>
+</main>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".meter-fill").forEach(function (bar) {
+        let score = Number(bar.getAttribute("data-score"));
+
+        if (!Number.isFinite(score)) {
+            score = 0;
+        }
+
+        score = Math.max(0, Math.min(100, score));
+        bar.style.width = score + "%";
+    });
+
+    const results = document.getElementById("batch-results");
+
+    if (results) {
+        results.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+    }
+});
+</script>
+
+</body>
+</html>
